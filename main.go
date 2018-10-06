@@ -47,7 +47,7 @@ func fetch_config() (config *Config, err error) {
 	return configData, nil
 }
 
-func fetch_transactions() (transactions, err error) {
+func fetch_transactions() (transactions []Transaction, err error) {
 	client := http.Client{}
 
 	req, err := http.NewRequest("GET", "https://api.monzo.com//transactions?expand[]=merchant&account_id="+AccountID, nil)
@@ -62,13 +62,13 @@ func fetch_transactions() (transactions, err error) {
 	body, err := ioutil.ReadAll(res.Body)
 	checkError(err)
 
-	var content *Transactions;
+	var content Transactions;
 	err = json.Unmarshal(body, &content)
 
 	//fmt.Println(string(body))
-	fmt.Println(content)
+	//fmt.Println(content)
 
-	return nil, nil
+	return content.Transactions, nil
 }
 
 func main() {
@@ -79,9 +79,12 @@ func main() {
 	AuthToken = "Bearer " + config.AuthToken
 	AccountID = config.AccountID
 
-	fmt.Println(AuthToken)
+	//fmt.Println(AuthToken)
 
 	// go and fetch transaction data
 
-	fetch_transactions();
+	data, err := fetch_transactions()
+    checkError(err)
+
+    fmt.Println(data[len(data) - 1])
 }
