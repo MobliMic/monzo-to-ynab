@@ -1,15 +1,15 @@
 package main
 
 import (
-	"io/ioutil"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
-var AuthToken string;
+var AuthToken string
 
-var AccountID string;
+var AccountID string
 
 type Config struct {
 	AuthToken string `json:"access_token"`
@@ -21,8 +21,8 @@ type Merchant struct {
 }
 
 type Transaction struct {
-	ID string `json:"id"`
-	Description string `json:"description"`
+	ID           string   `json:"id"`
+	Description  string   `json:"description"`
 	MerchantName Merchant `json:"merchant"`
 }
 
@@ -30,8 +30,8 @@ type Transactions struct {
 	Transactions []Transaction `json:"transactions"`
 }
 
-func checkError(err error){
-	if (err != nil){
+func checkError(err error) {
+	if err != nil {
 		panic(err)
 	}
 }
@@ -40,14 +40,14 @@ func fetch_config() (config *Config, err error) {
 	file, err := ioutil.ReadFile("./config.json")
 	checkError(err)
 
-	var configData *Config;
+	var configData *Config
 	err = json.Unmarshal(file, &configData)
 	checkError(err)
 
 	return configData, nil
 }
 
-func fetch_transactions() (transactions []Transaction, err error) {
+func fetchTransactions() (transactions []Transaction, err error) {
 	client := http.Client{}
 
 	req, err := http.NewRequest("GET", "https://api.monzo.com//transactions?expand[]=merchant&account_id="+AccountID, nil)
@@ -62,11 +62,8 @@ func fetch_transactions() (transactions []Transaction, err error) {
 	body, err := ioutil.ReadAll(res.Body)
 	checkError(err)
 
-	var content Transactions;
+	var content Transactions
 	err = json.Unmarshal(body, &content)
-
-	//fmt.Println(string(body))
-	//fmt.Println(content)
 
 	return content.Transactions, nil
 }
@@ -79,12 +76,10 @@ func main() {
 	AuthToken = "Bearer " + config.AuthToken
 	AccountID = config.AccountID
 
-	//fmt.Println(AuthToken)
-
 	// go and fetch transaction data
 
-	data, err := fetch_transactions()
-    checkError(err)
+	data, err := fetchTransactions()
+	checkError(err)
 
-    fmt.Println(data[len(data) - 1])
+	fmt.Println(data[len(data)-1])
 }
